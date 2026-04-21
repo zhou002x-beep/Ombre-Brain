@@ -15,3 +15,7 @@ scarp_paper
 backup_*/
 *.db
 import_state.json
+data/
+tests/integration/
+tests/regression/
+tests/unit/
