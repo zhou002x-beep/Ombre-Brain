@@ -111,17 +111,19 @@ mcp = FastMCP(
     host="0.0.0.0",
     port=OMBRE_PORT,
 )
-# --- Fake OAuth Endpoints to satisfy Claude mobile ---
-@mcp.app.get("/oauth/authorize")
+# --- Fake OAuth Endpoints ---
+@mcp.get("/oauth/authorize")
 async def oauth_authorize(redirect_uri: str, state: str):
     return RedirectResponse(f"{redirect_uri}?code=dummy&state={state}")
 
-@mcp.app.post("/oauth/token")
+@mcp.post("/oauth/token")
 async def oauth_token():
     return {
         "access_token": "dummy_token",
         "token_type": "bearer"
     }
+
+
 
 
 # =============================================================
