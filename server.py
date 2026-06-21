@@ -57,7 +57,7 @@ from decay_engine import DecayEngine
 from embedding_engine import EmbeddingEngine
 from import_memory import ImportEngine
 from utils import load_config, setup_logging, strip_wikilinks, count_tokens_approx
-
+from fastapi.responses import RedirectResponse
 # --- Load config & init logging / 加载配置 & 初始化日志 ---
 config = load_config()
 setup_logging(config.get("log_level", "INFO"))
@@ -111,6 +111,17 @@ mcp = FastMCP(
     host="0.0.0.0",
     port=OMBRE_PORT,
 )
+# --- Fake OAuth Endpoints to satisfy Claude mobile ---
+@mcp.app.get("/oauth/authorize")
+async def oauth_authorize(redirect_uri: str, state: str):
+    return RedirectResponse(f"{redirect_uri}?code=dummy&state={state}")
+
+@mcp.app.post("/oauth/token")
+async def oauth_token():
+    return {
+        "access_token": "dummy_token",
+        "token_type": "bearer"
+    }
 
 
 # =============================================================
