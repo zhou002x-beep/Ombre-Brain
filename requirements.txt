@@ -1,7 +1,3 @@
-fastapi
-python-multipart
-mcp
-uvicorn
 # ============================================================
 # Ombre Brain Python 依赖
 # 安装: pip install -r requirements.txt
@@ -31,4 +27,3 @@ httpx>=0.27.0
 # 向量相似度计算 (导入模式/聚类)
 numpy>=1.24.0
 scikit-learn>=1.2.0
-
