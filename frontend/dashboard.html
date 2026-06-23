@@ -1291,6 +1291,36 @@
   .icon-ok  { color: var(--positive); }
   .icon-err { color: var(--negative); }
   .icon-warn { color: var(--warning, #b89962); }
+  /* ====== Embedding 未配置警告 banner ====== */
+  #embed-warn-banner {
+    display: none;
+    position: sticky;
+    top: 56px;
+    z-index: 39;
+    padding: 9px 20px;
+    background: rgba(184,151,98,0.12);
+    border-bottom: 1.5px solid var(--warning);
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--text);
+    backdrop-filter: blur(4px);
+  }
+  #embed-warn-banner.show { display: flex; }
+  .embed-warn-btn {
+    padding: 3px 11px;
+    font-size: 11.5px;
+    border-radius: 3px;
+    border: 1px solid var(--warning);
+    background: transparent;
+    color: var(--warning);
+    cursor: pointer;
+    font-family: 'Share Tech Mono', monospace;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .embed-warn-btn:hover { background: rgba(184,151,98,0.18); }
   /* Model-list dropdown panel */
   .model-list-dropdown {
     display: none;
@@ -1681,6 +1711,14 @@
   <div class="tab" data-tab="settings"><span>设置</span><span class="tab-en">Settings</span></div>
   <div class="tab-spacer"></div>
   <div class="tab" data-tab="about"><span>关于</span><span class="tab-en">About</span></div>
+</div>
+
+<!-- embed-warn-banner: 向量化未配置时始终可见，配置后自动消失 -->
+<div id="embed-warn-banner">
+  <svg class="icon icon-warn" aria-hidden="true" style="flex-shrink:0;width:15px;height:15px;"><use href="#i-warn"></use></svg>
+  <span style="flex:1;line-height:1.5;"><b>向量化未配置</b> — 语义检索完全不可用，记忆系统无法正常运作。必须二选一：<b>云端 API Key</b>（Gemini / OpenAI 兼容）或 <b>本地 Ollama bge-m3</b>（离线，需 2–3 GB 内存）。</span>
+  <button class="embed-warn-btn" onclick="gotoEmbedCloud()">☁ 配置云端 Key</button>
+  <button class="embed-warn-btn" onclick="gotoEmbedLocal()">⬡ 本地向量化</button>
 </div>
 
 <div class="content" id="list-view">
@@ -6232,7 +6270,7 @@ async function bucketSaveEdit(bid) {
 }
 
 // ========================================
-// iter 1.6 §8 — onboarding 首启引导
+// iter 1.6 §8 — onboarding 首启引导 + embedding 警告
 // ========================================
 async function maybeShowOnboarding() {
   try {
@@ -6241,10 +6279,25 @@ async function maybeShowOnboarding() {
     if (d.first_run) {
       document.getElementById('onboarding-overlay').style.display = 'flex';
     }
+    const banner = document.getElementById('embed-warn-banner');
+    if (banner) banner.classList.toggle('show', !d.embedding_enabled);
   } catch (e) { /* 静默 */ }
 }
 function dismissOnboarding() {
   document.getElementById('onboarding-overlay').style.display = 'none';
+}
+function gotoEmbedCloud() {
+  document.querySelector('[data-tab=settings]')?.click();
+  setTimeout(() => {
+    const el = document.getElementById('cfg-emb-api-key');
+    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.focus(); }
+  }, 250);
+}
+function gotoEmbedLocal() {
+  document.querySelector('[data-tab=settings]')?.click();
+  setTimeout(() => {
+    document.getElementById('local-emb-status')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 250);
 }
 
 // ========================================
