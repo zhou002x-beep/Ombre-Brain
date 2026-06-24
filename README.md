@@ -414,20 +414,22 @@ docker compose -f deploy/docker-compose.yml up -d
 > - Model：`BAAI/bge-m3` —— **必须带 `BAAI/` 前缀**，只写 `bge-m3` 会报 `Model does not exist`（免费，1024 维）
 > - 填完点「保存」，再点旁边的「**测试**」确认连得通（会直接显示成功维度或具体错误）。其它 OpenAI 兼容商（DeepSeek 等）同理：base_url 带正确后缀、model 用对方控制台里的完整名。
 
-**本地向量化怎么搭（一键，无需命令行）**
+**本地向量化怎么搭（离线、无需 key、不出网）**
 
 本地模型跑在一个独立的 `ollama` 容器里（OB 不直接管它，所以最稳）。两步：
 
-1. **启动 ollama 容器**（一次性）。用源码部署的话，`deploy/docker-compose.yml` 里已带 `ollama` 服务，直接：
+1. **启动自带的 ollama 容器**（一次性）。Docker 用户版 compose 已内置该服务（默认不启），加 `--profile local` 即可拉起：
    ```bash
-   docker compose -f deploy/docker-compose.yml up -d ollama
+   docker compose -f docker-compose.user.yml --profile local up -d
    ```
-   或独立起一个（和 OB 同一 docker 网络即可）：
-   ```bash
-   docker run -d --name ombre-ollama --restart unless-stopped \
-     --network <OB所在网络> -v ollama:/root/.ollama ollama/ollama
-   ```
-2. **Dashboard → 设置 → 向量化 → 「🖥️ 本地向量模型」面板 → 点「🚀 一键搭建本地向量化」**。它会自动：下载 bge-m3（约 1.2GB，带进度条）→ 切换后端 → 后台重算全库向量。期间照常使用，检索暂用旧库。
+   > 源码部署同理；或独立起一个（和 OB 同一 docker 网络、容器名 `ombre-ollama` 即可）：
+   > ```bash
+   > docker run -d --name ombre-ollama --restart unless-stopped \
+   >   --network <OB所在网络> -v ollama:/root/.ollama ollama/ollama
+   > ```
+   OB 在容器网络里通过 `ombre-ollama:11434` 自动连它（代码已内置该默认，无需额外配置）。
+2. **Dashboard → 设置 → 向量化 → 「🖥️ 本地向量模型」面板 → 点「🚀 一键本地化」**。它会自动：下载 bge-m3（约 1.2GB，带进度条）→ 切换后端 → 后台重算全库向量。期间照常使用，检索暂用旧库。
+   > 裸机 / 非 Docker 部署：同一个按钮会**直接在本机免提权安装 Ollama 运行时**（Win/Linux/mac），无需你手动起容器。
 
 > 🌐 **国内网络**：模型下载默认走 ollama 官方源。拉不动时，在面板「分步操作」里换下载镜像（选 ModelScope 或填自定义 registry 前缀），再点「仅下载」。
 

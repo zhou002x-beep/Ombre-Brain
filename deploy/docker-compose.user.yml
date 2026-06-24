@@ -1,14 +1,20 @@
-﻿# Ombre Brain — 用户自部署
+# Ombre Brain — 用户自部署
 # 直接拉取 Docker Hub 镜像，不需要源码
 #
-# 用法：
+# 默认（云端向量化 / 或暂不开向量化）：
 #   docker compose -f docker-compose.user.yml up -d
 #
+# 想要本地向量化（离线、无需 key、不出网，多起一个 ollama 容器）：
+#   docker compose -f docker-compose.user.yml --profile local up -d
+#   然后到 Dashboard →「③ 引擎 · 本地向量模型」→「下载 bge-m3」→「切本地」即可。
+#
 # 需要准备：
-#   1. 把 config.yaml 放在与此文件相同目录（参考 config.example.yaml）
+#   1. 把 config.yaml 放在与此文件相同目录（参考 config.example.yaml）；
+#      不放也能跑，首次启动会用内置默认（云端 Gemini，待填 key）。
 #   2. 设置以下环境变量（或在此文件 environment: 段填写）：
-#      OMBRE_COMPRESS_API_KEY  — 压缩/脱水用的 LLM key
-#      OMBRE_DASHBOARD_PASSWORD — Dashboard 登录密码
+#      OMBRE_COMPRESS_API_KEY  — 压缩/脱水用的 LLM key（必填）
+#      OMBRE_DASHBOARD_PASSWORD — Dashboard 登录密码（必填）
+#      向量化的 key/base_url/model 可留空，之后在 Dashboard 里随时填、即时生效。
 
 services:
   ombre-brain:
@@ -19,7 +25,6 @@ services:
       - "8000:8000"
     environment:
       - OMBRE_TRANSPORT=streamable-http
-      - OMBRE_EMBED_BACKEND=${OMBRE_EMBED_BACKEND:-local}
       - OMBRE_COMPRESS_API_KEY=${OMBRE_COMPRESS_API_KEY}
       - OMBRE_COMPRESS_BASE_URL=${OMBRE_COMPRESS_BASE_URL:-}
       - OMBRE_COMPRESS_MODEL=${OMBRE_COMPRESS_MODEL:-}
@@ -30,3 +35,18 @@ services:
     volumes:
       - ./buckets:/app/buckets
       - ./config.yaml:/app/config.yaml
+
+  # ── 可选：本地向量化（Ollama + bge-m3）。默认不启动 ──
+  # 仅在加 `--profile local` 时才拉起。OB 在容器网络里通过容器名
+  # ombre-ollama:11434 自动连它（代码已内置该默认，无需额外配置）。
+  # 需约 2–3GB 空闲内存 + 1.2GB 磁盘；纯 CPU 即可。
+  ombre-ollama:
+    image: ollama/ollama:latest
+    container_name: ombre-ollama
+    restart: unless-stopped
+    profiles: ["local"]
+    volumes:
+      - ollama-data:/root/.ollama
+
+volumes:
+  ollama-data:

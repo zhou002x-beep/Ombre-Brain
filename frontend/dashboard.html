@@ -5201,7 +5201,7 @@ async function loadLocalEmbStatus() {
       (d.models && d.models.length ? '<br><span style="color:var(--text-light)">已装：' + d.models.map(esc).join(', ') + '</span>' : '');
     var hint = document.getElementById('local-emb-hint');
     if (hint) {
-      if (envD && envD.in_docker) hint.innerHTML = _SV.warn + ' Docker 部署：用 compose 的 ollama 服务 <code>docker compose -f deploy/docker-compose.yml up -d ollama</code>（容器内无法给宿主装运行时）。';
+      if (envD && envD.in_docker) hint.innerHTML = _SV.warn + ' Docker 部署：启用自带的本地向量化容器 <code>docker compose -f docker-compose.user.yml --profile local up -d</code>（容器内无法给宿主装运行时），起好后回来「下载 bge-m3」→「切本地」。';
       else if (!d.reachable && envD && !envD.installed) hint.innerHTML = _SV.info + ' 还没装本地运行时。点「一键本地化」或「1·安装运行时」自动装（免管理员 / sudo）。';
       else if (!d.reachable) hint.innerHTML = _SV.info + ' 运行时已装但没在跑，点「2·启动」。';
       else hint.textContent = '提示：切换云端↔本地会全库重算（Gemini 3072 维 ↔ bge-m3 1024 维不通用），重算期间检索暂用旧库，不影响使用。';
@@ -5353,7 +5353,7 @@ async function oneClickLocal() {
   var env = await readJsonSafe(er);
   if (!env || !env.ok) { alert('环境检测失败，请稍后重试。'); return; }
   if (env.in_docker) {
-    alert('检测到 OB 运行在 Docker 容器里。\n\n本地向量化请用 compose 里的 ollama 服务（容器内无法给宿主装运行时）：\n\n  docker compose -f deploy/docker-compose.yml up -d ollama\n\n起好后回来点「切本地」。');
+    alert('检测到 OB 运行在 Docker 容器里。\n\n本地向量化请启用自带的 ollama 容器（容器内无法给宿主装运行时）：\n\n  docker compose -f docker-compose.user.yml --profile local up -d\n\n起好后回来：「下载 bge-m3」→「切本地」即可。');
     return;
   }
   var osName = ({ windows:'Windows', linux:'Linux', macos:'macOS' })[env.os] || env.os;
