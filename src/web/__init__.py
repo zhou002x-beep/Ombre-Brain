@@ -20,6 +20,8 @@ from . import dashboard
 from . import system
 from . import meta
 from . import search
+from . import plans
+from . import letters
 
 
 def register_all(mcp) -> None:
@@ -31,3 +33,5 @@ def register_all(mcp) -> None:
     system.register(mcp)
     meta.register(mcp)
     search.register(mcp)
+    plans.register(mcp)
+    letters.register(mcp)
